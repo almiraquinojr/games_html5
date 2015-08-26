@@ -46,6 +46,7 @@
 				//Aumenta a dificuldade do jogo
 				if(jogador.pontuacao > 0 && jogador.pontuacao % 10 == 0){
 					this.velocidade++;
+					jogador.velocidade += 10;
 				}
 			} else if(this.y + this.diametro/2 >= alturaTela){
 				bolas_perdidas--;
@@ -70,7 +71,7 @@
 		x: (larguraTela - this.largura) / 2,
 		altura: 30,
 		largura: 200,
-		velocidade: 100,
+		velocidade: 50,
 		pontuacao: 0,
 
 		desenha: function () {
@@ -137,8 +138,6 @@
 			jogador.limpa();
 			bola.limpa();
 			bola.velocidade = 5;
-
-			gameLoop();
 		}
 	}
 
@@ -161,7 +160,7 @@
 			desenha();
 		} else if (estado_atual == estados.PERDEU) {
 			estado_atual = estados.JOGAR;
-		}		
+		}
 
 		window.requestAnimationFrame(gameLoop);
 	}
