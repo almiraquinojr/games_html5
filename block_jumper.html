@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Jumper Block</title>
+		<style>
+			canvas {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				margin: auto;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			var canvas, context, SCREEN_WIDTH, SCREEN_HEIGHT, frames = 0, max_jumps = 3, velocity = 6, current_state, 
+
+			states = {
+				PLAY: 0,
+				RUNNING: 1,
+				LOSE: 2
+			}
+
+			floor = {
+				y: 550,
+				height: 50,
+				color: "#ffdf70",
+				
+				draw: function(){
+					context.fillStyle = this.color;
+					context.fillRect(0, this.y, SCREEN_WIDTH, this.height);
+				}
+			},
+
+			player = {
+				x: 50,
+				y: 0,
+				height: 50,
+				width: 50,
+				color: "#ff4e4e",
+				gravity: 1.6,
+				velocity: 0,
+				jump_force: 23.6,
+				jumps: 0,
+				score: 0,
+
+				refresh: function(){
+					this.velocity += this.gravity;
+					this.y += this.velocity;
+
+					if (this.y > floor.y - this.height && current_state != states.LOSE) {
+						this.y = floor.y - this.height;
+						this.jumps = 0;
+						this.velocity = 0;
+					}
+				},
+
+				jump: function(){
+					if (this.jumps < max_jumps) {
+						this.velocity = -this.jump_force;
+						this.jumps++;
+					}
+				},
+
+				draw: function(){
+					context.fillStyle = this.color;
+					context.fillRect(this.x, this.y, this.width, this.height);
+				},
+
+				reset: function(){
+					this.y = 0;
+					this.velocity = 0;
+					this.score = 0;
+				}
+			},
+
+			obstacles = {
+				bars: [],
+				colors: ["#ffbc1c", "#ff1c1c", "#ff85e1", "#52a7ff", "#78ff5d"],
+				insertTime: 0,
+
+				insert: function(){
+					this.bars.push({
+						x: SCREEN_WIDTH,
+						width: 50,
+						height: 30 + Math.floor(120 * Math.random()),
+						color: this.colors[Math.floor(5 * Math.random())]
+					});
+
+					this.insertTime = 30 + Math.floor(50 * Math.random());
+				},
+
+				refresh: function(){
+					if(this.insertTime == 0){
+						this.insert();
+					} else {
+						this.insertTime--;
+					}
+
+					for (var i = 0, size = this.bars.length; i < size; i++) {
+						var bar = this.bars[i];
+						bar.x -= velocity;
+
+						//Player/Bar colision
+						if(player.x < bar.x + bar.width && 
+						   player.x + player.width >= bar.x && 
+						   player.y + player.height >= floor.y - bar.height)
+						{
+							current_state = states.LOSE;
+						}else if(bar.x == 0){
+							player.score++;
+						}else if (bar.x <= -bar.width) { //Erase bar
+							this.bars.splice(bar, 1);
+							size--;
+							i--;
+						}
+					}
+				},
+
+				draw: function(){
+					for (var i = 0, size = this.bars.length; i < size; i++) {
+						var bar = this.bars[i];
+						context.fillStyle = bar.color;
+						context.fillRect(bar.x, floor.y - bar.height, bar.width, bar.height);
+					}
+				},
+
+				clear: function(){
+					this.bars = [];
+				}
+			};
+
+			function initialize() {
+				SCREEN_HEIGHT = window.innerHeight;
+				SCREEN_WIDTH = window.innerWidth;
+
+				if (SCREEN_HEIGHT >= 500) {
+					SCREEN_HEIGHT = 600;
+					SCREEN_WIDTH = 600;
+				}
+
+				canvas = document.createElement("canvas");
+				canvas.width = SCREEN_WIDTH;
+				canvas.height = SCREEN_HEIGHT;
+				canvas.style.border = "1px solid #000";
+
+				context = canvas.getContext("2d");
+				document.body.appendChild(canvas);
+
+				document.addEventListener("mousedown", onClick);
+				current_state = states.PLAY;
+				run();
+			}
+
+			function onClick(event) {
+				if(current_state == states.RUNNING){
+					player.jump();
+				} else if (current_state == states.PLAY) {
+					current_state = states.RUNNING;
+				} else if (current_state == states.LOSE){
+					current_state = states.PLAY;
+					player.reset();
+					obstacles.clear();
+				}
+			}			
+
+			function run(){
+				refresh();
+				draw();
+
+				window.requestAnimationFrame(run);
+			}
+
+			function refresh(){
+				frames++;
+
+				player.refresh();
+
+				if (current_state == states.RUNNING) {
+					obstacles.refresh();
+				} else if (current_state == states.LOSE) {
+					
+				}
+			}
+
+			function draw(){
+				context.fillStyle = "#50beff";
+				context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+				context.fillStyle = "white";
+				context.font = "50px Arial";
+				context.fillText(player.score, 30, 68);
+
+				if(current_state == states.PLAY){
+					context.fillStyle = "green";
+					context.fillRect(SCREEN_WIDTH /2 - 50, SCREEN_HEIGHT / 2 - 50, 100, 100);
+				}else if (current_state == states.LOSE) {
+					context.fillStyle = "red";
+					context.fillRect(SCREEN_WIDTH /2 - 50, SCREEN_HEIGHT / 2 - 50, 100, 100);
+
+					context.save();					
+					context.translate(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+					context.fillStyle = "white";
+					if(player.score < 10){
+						context.fillText(player.score, -13, 19);
+					}else if (player.score >= 10 && player.score < 100) {
+						context.fillText(player.score, -28, 19);
+					}else {
+						context.fillText(player.score, -42, 19);
+					}
+					context.restore();
+				}else if (current_state == states.RUNNING) {
+					obstacles.draw();					
+				}
+
+				floor.draw();
+				player.draw();
+			}
+
+			initialize();
+		</script>
+	</body>
+</html>
