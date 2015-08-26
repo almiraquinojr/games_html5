@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<style>
+	    canvas {
+	        border: 3px solid #49AAff;
+	        position: absolute;
+	        top: 0;
+	        bottom: 0;
+	        left: 50%;
+	        right: 0;
+	        margin-top: 30px;
+	        margin-left: -500px;
+	    }
+     </style>
+</head>
+<body onload="main();">
+
+<script>
+	var canvas, context, alturaTela, larguraTela, bolas_perdidas = 3, estado_atual,
+
+	estados = {
+		JOGAR: 0,
+		JOGANDO: 1,
+		PERDEU: 2
+	},
+
+	bola = {
+		x: 1000 / 2,
+		y: 0,
+		diametro: 15,
+		velocidade: 5,
+
+		desenha: function () {
+			context.beginPath();
+			context.arc(this.x, this.y, this.diametro, 0, Math.PI * 2);
+			context.fill();
+
+			//Colisão com o jogador
+			if (this.y + this.diametro/2 >= alturaTela - jogador.altura && this.x >= jogador.x && this.x <= jogador.x + jogador.largura) {
+				jogador.pontuacao++;
+				this.limpa();
+
+				//Aumenta a dificuldade do jogo
+				if(jogador.pontuacao > 0 && jogador.pontuacao % 10 == 0){
+					this.velocidade++;
+				}
+			} else if(this.y + this.diametro/2 >= alturaTela){
+				bolas_perdidas--;
+				this.limpa();
+				if (bolas_perdidas == 0) {
+					estado_atual = estados.PERDEU;
+					bolas_perdidas = 3;
+					this.velocidade = 5;
+				}
+			} else {
+				this.y += this.velocidade;
+			}			
+		},
+
+		limpa: function(){
+			this.y = -10;
+			this.x = 30 + (Math.floor(571 * Math.random()));
+		}
+	},
+
+	jogador = {
+		x: (larguraTela - this.largura) / 2,
+		altura: 30,
+		largura: 200,
+		velocidade: 100,
+		pontuacao: 0,
+
+		desenha: function () {
+			context.fillRect(this.x, alturaTela - this.altura, this.largura, this.altura);
+		},
+
+		limpa: function () {
+			this.pontuacao = 0;
+			this.x = (larguraTela - this.largura) / 2;
+		}
+	};
+
+	function main () {
+		larguraTela = 1000;
+		alturaTela = 600;
+
+		canvas = document.createElement("canvas");
+		canvas.width = larguraTela;
+		canvas.height = alturaTela;
+
+		document.body.appendChild(canvas);
+
+		context = canvas.getContext("2d");
+
+		jogador.x = (larguraTela - jogador.largura) / 2;
+
+		document.addEventListener('keydown', onKeyDown);
+		document.addEventListener('click', onClick);
+
+		estado_atual = estados.JOGAR;
+
+		gameLoop();
+	}
+
+	function desenha () {
+		jogador.desenha();
+		bola.desenha();
+
+		//Painel de pontuação
+		context.font = "50px Arial";
+		context.fillText(jogador.pontuacao, 30, 60);
+
+		//Vidas
+		context.font = "20px Arial";
+		context.fillText("Vidas: " + bolas_perdidas, 900, 30);		
+	}
+
+	function onKeyDown (event) {
+		if (event.keyCode == 37) {
+			if (jogador.x > 0) {
+				jogador.x -= jogador.velocidade;
+			}
+		} else if (event.keyCode == 39){
+			if(jogador.x + jogador.largura < larguraTela){
+				jogador.x += jogador.velocidade;				
+			}
+		}		
+	}
+
+	function onClick(event){
+		if (estado_atual == estados.JOGAR) {
+			estado_atual = estados.JOGANDO;
+
+			jogador.limpa();
+			bola.limpa();
+			bola.velocidade = 5;
+
+			gameLoop();
+		}
+	}
+
+	function gameLoop(){
+		context.clearRect(0, 0, larguraTela, alturaTela);
+		if (estado_atual == estados.JOGAR) {
+			//Desenha o play
+			context.save();
+			context.beginPath();
+			context.moveTo(475, 250);
+			context.lineTo(525, 300);
+			context.lineTo(475, 350);
+			context.lineTo(475, 250);
+			context.fill();
+			context.restore();
+
+			context.font = "50px Arial";
+			context.fillText(jogador.pontuacao, 30, 60);
+		} else if (estado_atual == estados.JOGANDO){
+			desenha();
+		} else if (estado_atual == estados.PERDEU) {
+			estado_atual = estados.JOGAR;
+		}		
+
+		window.requestAnimationFrame(gameLoop);
+	}
+
+	
+</script>
+
+</body>
+</html>
