@@ -51,6 +51,9 @@
 			} else if(this.y + this.diametro/2 >= alturaTela){
 				bolas_perdidas--;
 				this.limpa();
+				canvas.style.border = "3px solid red";
+				setTimeout(function(){canvas.style.border = "3px solid #49AAff"}, 500);
+				
 				if (bolas_perdidas == 0) {
 					estado_atual = estados.PERDEU;
 					bolas_perdidas = 3;
@@ -81,6 +84,7 @@
 		limpa: function () {
 			this.pontuacao = 0;
 			this.x = (larguraTela - this.largura) / 2;
+			this.velocidade = 50;
 		}
 	};
 
@@ -126,7 +130,7 @@
 			}
 		} else if (event.keyCode == 39){
 			if(jogador.x + jogador.largura < larguraTela){
-				jogador.x += jogador.velocidade;				
+				jogador.x += jogador.velocidade;
 			}
 		}		
 	}
