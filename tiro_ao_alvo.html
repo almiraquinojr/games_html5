@@ -1,0 +1,73 @@
+<meta charset="utf-8">
+
+<canvas id="tela" width="800" height="600" style="background-color: grey;"></canvas>
+
+<script>
+
+	var tela = document.getElementById("tela");
+	var c = tela.getContext("2d");
+	c.font = "70px Verdana";
+	var pontos = 0;
+	var tempo = 1000;
+
+	var circulo = function(x, y, raio, cor){
+		c.fillStyle = cor;
+		c.beginPath();
+		c.arc(x, y, raio, 0, 2 * Math.PI);
+		c.fill();
+	}
+
+	var desenhaAlvo = function(x, y) {
+    	var raio = 40;
+	    circulo(x, y, raio, "white");
+	    circulo(x, y, raio-10, "red");
+	    circulo(x, y, raio-20, "white");
+	    circulo(x, y, raio-30, "red");
+	    c.fillStyle = "white";
+	};
+
+	var limpaTela = function(){
+		c.clearRect(0, 0, 800, 600);
+		c = tela.getContext("2d");
+	}
+
+	var sorteia = function(num){
+		return Math.round(Math.random()*(num));
+	}
+	
+	var alvoX;
+	var alvoY;
+
+	var desenha = function(){
+		limpaTela();
+		alvoX = sorteia(630);
+		alvoY = sorteia(600);
+		desenhaAlvo(alvoX, alvoY);		
+		c.fillText(pontos, 700, 80);
+	}
+
+	tela.onclick = function(event){
+		var raio = 40;
+		var cliqueX = event.pageX - tela.offsetLeft;
+		var cliqueY = event.pageY - tela.offsetTop;
+		
+		//Colisão do circulo
+		var dx = (alvoX + raio) - (cliqueX + raio);
+		var dy = (alvoY + raio) - (cliqueY + raio);
+		var distance = Math.sqrt(dx * dx + dy * dy);
+		
+		if(distance < raio){
+			pontos++;
+			tempo = tempo - 50;
+			clearInterval(timer);
+			timer = setInterval(function(){
+				desenha();
+			}, tempo);
+		}
+	};
+
+	var timer = setInterval(function(){
+		desenha();
+	}, 1000);
+	
+</script>
