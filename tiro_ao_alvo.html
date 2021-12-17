@@ -1,4 +1,20 @@
-<meta charset="utf-8">
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Tiro ao Alvo</title>
+		<style>
+			canvas {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				margin: auto;
+			}
+		</style>
+	</head>
+	<body>
 
 <canvas id="tela" width="800" height="600" style="background-color: grey;"></canvas>
 
@@ -53,10 +69,11 @@
 		
 		//Colisão do circulo
 		var dx = (alvoX + raio) - (cliqueX + raio);
-		var dy = (alvoY + raio) - (cliqueY + raio);
+		var dy = (alvoY + raio) - (cliqueY + raio);		
 		var distance = Math.sqrt(dx * dx + dy * dy);
 		
 		if(distance < raio){
+			desenha();
 			pontos++;
 			tempo = tempo - 50;
 			clearInterval(timer);
@@ -71,3 +88,4 @@
 	}, 1000);
 	
 </script>
+</body>
