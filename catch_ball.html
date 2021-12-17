@@ -44,9 +44,9 @@
 				this.limpa();
 
 				//Aumenta a dificuldade do jogo
-				if(jogador.pontuacao > 0 && jogador.pontuacao % 10 == 0){
+				if(jogador.pontuacao > 0 && jogador.pontuacao % 5 == 0){
 					this.velocidade++;
-					jogador.velocidade += 10;
+					jogador.velocidade += 20;
 				}
 			} else if(this.y + this.diametro/2 >= alturaTela){
 				bolas_perdidas--;
@@ -76,6 +76,7 @@
 		largura: 200,
 		velocidade: 50,
 		pontuacao: 0,
+		record: 0,
 
 		desenha: function () {
 			context.fillRect(this.x, alturaTela - this.altura, this.largura, this.altura);
@@ -115,8 +116,9 @@
 		bola.desenha();
 
 		//Painel de pontuação
-		context.font = "50px Arial";
-		context.fillText(jogador.pontuacao, 30, 60);
+		context.font = "25px Arial";
+		context.fillText("P: " + jogador.pontuacao, 20, 40);
+		context.fillText("R: " + jogador.record, 20, 70);
 
 		//Vidas
 		context.font = "20px Arial";
@@ -158,12 +160,18 @@
 			context.fill();
 			context.restore();
 
+			context.font = "25px Arial";
+			context.fillText("P: " + jogador.pontuacao, 20, 40);
+			context.fillText("R: " + jogador.record, 20, 70);
+
 			context.font = "50px Arial";
-			context.fillText(jogador.pontuacao, 30, 60);
 		} else if (estado_atual == estados.JOGANDO){
 			desenha();
 		} else if (estado_atual == estados.PERDEU) {
 			estado_atual = estados.JOGAR;
+			if (jogador.record < jogador.pontuacao) {
+				jogador.record = jogador.pontuacao;
+			}
 		}
 
 		window.requestAnimationFrame(gameLoop);
